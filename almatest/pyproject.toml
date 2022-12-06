@@ -1,0 +1,38 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "almatest"
+version = "0.1.0"
+description = ""
+authors = ["boksh <e.bokshitskiy@hh.ru>"]
+readme = "README.md"
+packages = [
+    { include = "almatest" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<=3.11"
+pytest = "^7.2.0"
+pytest-asyncio = "^0.20.1"
+testcontainers = "^3.7.0"
+psycopg2-binary = "^2.9.5"
+redis = "*"
+SQLAlchemy = "*"
+
+[tool.poetry.plugins."pytest11"]
+almatest = "almatest"
+
+[tool.pytest.ini_options]
+testpaths = "tests"
+filterwarnings = "error"
+addopts = '''
+  --asyncio-mode=auto
+  -p no:warnings
+'''
+
+[tool.black]
+line-length = 120
+target-version = ['py39']
+include = '\.pyi?$'

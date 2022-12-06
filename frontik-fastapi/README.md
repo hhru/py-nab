@@ -1,0 +1,1 @@
+frontik-fastapi integration
