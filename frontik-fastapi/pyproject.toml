@@ -1,0 +1,37 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "frontik-fastapi"
+version = "0.1.0"
+description = "fastapi integration for frontik app"
+authors = ["boksh <e.bokshitskiy@hh.ru>"]
+packages = [
+    { include = "ffapi" },
+]
+
+[tool.poetry.group.main.dependencies]
+python = ">=3.9,<=3.10"
+fastapi = { extras = ["all"], version = "^0.88.0" }
+frontik = { git = "ssh://git@github.com/hhru/frontik", tag = "6.5.1" }
+
+[tool.poetry.group.test]
+optional = true
+
+[tool.poetry.group.test.dependencies]
+almatest = { path = "../hh-almatest", develop = true }
+httpx = "^0.23.0"
+
+[tool.pytest.ini_options]
+testpaths = "tests"
+filterwarnings = "error"
+addopts = '''
+  --asyncio-mode=auto
+  -p no:warnings
+'''
+
+[tool.black]
+line-length = 120
+target-version = ['py39']
+include = '\.pyi?$'

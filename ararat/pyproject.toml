@@ -1,0 +1,41 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "ararat"
+version = "0.1.0"
+description = "tools for python backend application"
+authors = ["boksh <e.bokshitskiy@hh.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.8,<=3.11"
+pytz = "^2022.6"
+sqlalchemy = { version = "^1.4.44", optional = true }
+sqlalchemy-stubs = { version = "^0.4", optional = true }
+asyncpg = { version = "^0.27.0", optional = true }
+pydantic = { version = "*", optional = true }
+
+[tool.poetry.extras]
+db = ["sqlalchemy", "sqlalchemy-stubs", "asyncpg"]
+serde = ["pydantic"]
+
+[tool.poetry.group.test]
+optional = true
+
+[tool.poetry.group.test.dependencies]
+almatest = { path = "../almatest", develop = true }
+
+[tool.pytest.ini_options]
+testpaths = "tests"
+filterwarnings = "error"
+addopts = '''
+  --asyncio-mode=auto
+  -p no:warnings
+'''
+
+[tool.black]
+line-length = 120
+target-version = ['py39']
+include = '\.pyi?$'
