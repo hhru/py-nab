@@ -16,10 +16,27 @@ from ararat.db.connection import get_engine
 _current_session_var: ContextVar["ArAsyncSession"] = ContextVar("_current_session")
 
 
+class MissingCurrentSession(RuntimeError):
+    pass
+
+
 def get_current_session(allow_missing=False) -> Optional[AsyncSession]:
     if allow_missing:
-        return _current_session_var.get(None)
-    return _current_session_var.get()
+        session = _current_session_var.get(None)
+    else:
+        try:
+            session = _current_session_var.get()
+        except LookupError:
+            raise MissingCurrentSession(f"session not found in contextvar")
+
+    current_task = asyncio.current_task()
+    if session and session._asyncio_task is not current_task:
+        if not allow_missing:
+            raise MissingCurrentSession(
+                f"found session ({session._asyncio_task=} does't match curret task ({current_task=})"
+            )
+        return None
+    return session
 
 
 C = TypeVar("C", bound=Callable)
@@ -105,6 +122,7 @@ class ArAsyncSession(AsyncSession):
 
     async def __aenter__(self):
         self._current_session_var_token = _current_session_var.set(self)
+        self._asyncio_task = asyncio.current_task()
         return await super().__aenter__()
 
     async def __aexit__(self, type_, value, traceback, reset_session_contextvar=True) -> None:

@@ -1,11 +1,11 @@
 from collections import defaultdict
-from typing import Optional, Union, Collection, TypeVar, Type, Any, Tuple, List, Dict
+from typing import Union, Collection, TypeVar, Type, Any, Tuple, List, Dict, Optional
 
 from sqlalchemy import update, delete, select
 from sqlalchemy.engine import CursorResult, Result
 from sqlalchemy.sql import Executable, Select, Update, Delete
 
-from ararat.db.session import get_current_session, ArAsyncSession
+from ararat.db.session import get_current_session
 
 T = TypeVar("T")
 C1 = TypeVar("C1")
@@ -13,10 +13,8 @@ C2 = TypeVar("C2")
 
 
 class BaseDao:
-    def __init__(self, session: Optional[ArAsyncSession] = None) -> None:
-        if session is None:
-            session = get_current_session()
-        self._session = session
+
+    def __init__(self) -> None:
         self._options = None
         self._criteria = None
         self._order_by = None
@@ -43,7 +41,7 @@ class BaseDao:
         return self
 
     async def execute(self, stmt: Executable, *args, **kwargs) -> Union[CursorResult, Result]:
-        return await self._session.execute(stmt, *args, **kwargs)
+        return await get_current_session().execute(stmt, *args, **kwargs)
 
     def select(self, *args) -> Select:
         if self._options:
@@ -61,7 +59,15 @@ class BaseDao:
         return delete(*args)
 
     async def get(self, entity: Type[T], ident: Any, *args, **kwargs) -> Optional[T]:
-        return await self._session.get(entity, ident, *args, **kwargs)
+        return await get_current_session().get(entity, ident, *args, **kwargs)
+
+    async def get_page(self, by_column, last, page_size: int, reverse: bool = True) -> List[T]:
+        stmt = self.select(by_column.parent).order_by(by_column.desc() if reverse else by_column.asc()).limit(page_size)
+        if self._criteria:
+            stmt = stmt.where(*self._criteria)
+        if last:
+            stmt = stmt.where((by_column < last) if reverse else (by_column > last))
+        return await self.get_all(stmt)
 
     async def get_by_ids(self, column: C1, ids: Collection[C1], preserve_order=False) -> List[T]:
         if not ids:
@@ -95,13 +101,15 @@ class BaseDao:
         return result_dict
 
     async def add(self, obj: T) -> T:
-        self._session.add(obj)
-        await self._session.flush()
+        session = get_current_session()
+        session.add(obj)
+        await session.flush()
         return obj
 
-    async def add_all(self, items: List[T]) -> List[T]:
-        self._session.add_all(items)
-        await self._session.flush()
+    async def add_all(self, items: list[T]) -> list[T]:
+        session = get_current_session()
+        session.add_all(items)
+        await session.flush()
         return items
 
     async def get_first(self, stmt) -> Union[Any, Tuple[Any, ...]]:
@@ -133,15 +141,3 @@ class BaseDao:
         if len(stmt.column_descriptions) == 1:
             result = result.scalars()
         return result
-
-    async def __aenter__(self):
-        return self
-
-    async def __aexit__(self, type_, value, traceback):
-        return
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, type_, value, traceback):
-        return
