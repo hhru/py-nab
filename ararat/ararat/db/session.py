@@ -61,9 +61,7 @@ class SessionMaker(sessionmaker):
     def initialize(self, db_url: Optional[str] = None, **engine_kwargs):
         if not db_url:
             db_url = self.db_url
-        kwargs = {**self.engine_kwargs, **engine_kwargs}
-        if "connect_args" not in kwargs:
-            kwargs["connect_args"] = {}
+        kwargs = {"connect_args": self.connect_args or {}, **self.engine_kwargs, **engine_kwargs}
 
         connect_args = kwargs["connect_args"]
         if "connection_class" not in connect_args:
