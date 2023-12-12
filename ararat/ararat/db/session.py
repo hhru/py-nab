@@ -27,13 +27,13 @@ def get_current_session(allow_missing=False) -> Optional[AsyncSession]:
         try:
             session = _current_session_var.get()
         except LookupError:
-            raise MissingCurrentSession(f"session not found in contextvar")
+            raise MissingCurrentSession("session not found in contextvar")
 
     current_task = asyncio.current_task()
     if session and session._asyncio_task is not current_task:
         if not allow_missing:
             raise MissingCurrentSession(
-                f"found session ({session._asyncio_task=} does't match curret task ({current_task=})"
+                f"found session ({session._asyncio_task=} does't match current task ({current_task=})"
             )
         return None
     return session

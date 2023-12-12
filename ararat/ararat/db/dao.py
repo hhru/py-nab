@@ -3,6 +3,7 @@ from typing import Union, Collection, TypeVar, Type, Any, Tuple, List, Dict, Opt
 
 from sqlalchemy import update, delete, select
 from sqlalchemy.engine import CursorResult, Result
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import Executable, Select, Update, Delete
 
 from ararat.db.session import get_current_session
@@ -13,11 +14,17 @@ C2 = TypeVar("C2")
 
 
 class BaseDao:
-
-    def __init__(self) -> None:
+    def __init__(self, session: Optional[AsyncSession] = None) -> None:
         self._options = None
         self._criteria = None
         self._order_by = None
+        self._session = session
+
+    @property
+    def session(self) -> AsyncSession:
+        if self._session is None:
+            self._session = get_current_session()
+        return self._session
 
     def options(self: T, *options) -> T:
         if not self._options:
@@ -41,7 +48,7 @@ class BaseDao:
         return self
 
     async def execute(self, stmt: Executable, *args, **kwargs) -> Union[CursorResult, Result]:
-        return await get_current_session().execute(stmt, *args, **kwargs)
+        return await self.session.execute(stmt, *args, **kwargs)
 
     def select(self, *args) -> Select:
         if self._options:
@@ -59,7 +66,7 @@ class BaseDao:
         return delete(*args)
 
     async def get(self, entity: Type[T], ident: Any, *args, **kwargs) -> Optional[T]:
-        return await get_current_session().get(entity, ident, *args, **kwargs)
+        return await self.session.get(entity, ident, *args, **kwargs)
 
     async def get_page(self, by_column, last, page_size: int, reverse: bool = True) -> List[T]:
         stmt = self.select(by_column.parent).order_by(by_column.desc() if reverse else by_column.asc()).limit(page_size)
@@ -101,15 +108,13 @@ class BaseDao:
         return result_dict
 
     async def add(self, obj: T) -> T:
-        session = get_current_session()
-        session.add(obj)
-        await session.flush()
+        self.session.add(obj)
+        await self.session.flush()
         return obj
 
     async def add_all(self, items: list[T]) -> list[T]:
-        session = get_current_session()
-        session.add_all(items)
-        await session.flush()
+        self.session.add_all(items)
+        await self.session.flush()
         return items
 
     async def get_first(self, stmt) -> Union[Any, Tuple[Any, ...]]:
