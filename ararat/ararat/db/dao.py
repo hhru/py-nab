@@ -18,13 +18,13 @@ class BaseDao:
         self._options = None
         self._criteria = None
         self._order_by = None
-        self._session = session
+        self.__session = session
 
     @property
-    def session(self) -> AsyncSession:
-        if self._session is None:
-            self._session = get_current_session()
-        return self._session
+    def _session(self) -> AsyncSession:
+        if self.__session is None:
+            self.__session = get_current_session()
+        return self.__session
 
     def options(self: T, *options) -> T:
         if not self._options:
@@ -48,7 +48,7 @@ class BaseDao:
         return self
 
     async def execute(self, stmt: Executable, *args, **kwargs) -> Union[CursorResult, Result]:
-        return await self.session.execute(stmt, *args, **kwargs)
+        return await self._session.execute(stmt, *args, **kwargs)
 
     def select(self, *args) -> Select:
         if self._options:
@@ -66,7 +66,7 @@ class BaseDao:
         return delete(*args)
 
     async def get(self, entity: Type[T], ident: Any, *args, **kwargs) -> Optional[T]:
-        return await self.session.get(entity, ident, *args, **kwargs)
+        return await self._session.get(entity, ident, *args, **kwargs)
 
     async def get_page(self, by_column, last, page_size: int, reverse: bool = True) -> List[T]:
         stmt = self.select(by_column.parent).order_by(by_column.desc() if reverse else by_column.asc()).limit(page_size)
@@ -108,13 +108,13 @@ class BaseDao:
         return result_dict
 
     async def add(self, obj: T) -> T:
-        self.session.add(obj)
-        await self.session.flush()
+        self._session.add(obj)
+        await self._session.flush()
         return obj
 
     async def add_all(self, items: list[T]) -> list[T]:
-        self.session.add_all(items)
-        await self.session.flush()
+        self._session.add_all(items)
+        await self._session.flush()
         return items
 
     async def get_first(self, stmt) -> Union[Any, Tuple[Any, ...]]:
