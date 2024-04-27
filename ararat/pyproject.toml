@@ -10,7 +10,7 @@ authors = ["boksh <e.bokshitskiy@hh.ru>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<=3.12"
+python = ">=3.9,<=3.12"
 pytz = "^2022.6"
 sqlalchemy = { version = "^1.4.44", optional = true }
 sqlalchemy-stubs = { version = "^0.4", optional = true }
