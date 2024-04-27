@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "almatest"
-version = "0.1.3"
+version = "1.0.0"
 description = ""
 authors = ["boksh <e.bokshitskiy@hh.ru>"]
 readme = "README.md"
