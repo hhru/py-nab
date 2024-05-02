@@ -1,13 +1,9 @@
 import asyncio
 
-from testcontainers.core.config import testcontainers_config
 from testcontainers.postgres import PostgresContainer
 from testcontainers.redis import RedisContainer
 
 from almatest.containers import start_container
-
-# ryuk невозможно поднимать в тредах, потому что код Reaper-а в testcontainers нетредсейфный
-testcontainers_config.ryuk_disabled = True
 
 
 async def test_run_containers():
