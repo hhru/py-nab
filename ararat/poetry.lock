@@ -2,7 +2,7 @@
 
 [[package]]
 name = "almatest"
-version = "1.1.0"
+version = "1.3.0"
 description = ""
 optional = false
 python-versions = ">=3.9,<=3.12"
@@ -1000,4 +1000,4 @@ serde = ["pydantic"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<=3.12"
-content-hash = "67979162a9a6466b796361dc4cc3c56af0e4a03e5ca5d043b7af3deac5be9556"
+content-hash = "a69a317e00aeb8d602534facc1ec9648fb160768e6fd28529d475836d67c3e86"
