@@ -26,6 +26,7 @@ optional = true
 
 [tool.poetry.group.test.dependencies]
 almatest = { path = "../almatest", develop = true }
+ruff = '0.1.8'
 
 [tool.pytest.ini_options]
 testpaths = "tests"
@@ -35,7 +36,10 @@ addopts = '''
   -p no:warnings
 '''
 
-[tool.black]
+[tool.ruff]
 line-length = 120
-target-version = ['py39']
-include = '\.pyi?$'
+target-version = 'py38'
+select = [
+    'FA',
+]
+preview = true

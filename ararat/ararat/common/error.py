@@ -1,5 +1,6 @@
+from __future__ import annotations
 from enum import Enum
-from typing import Generic, Any, TypeVar, Type
+from typing import Generic, Any, TypeVar
 
 T = TypeVar("T", bound=Enum)
 
@@ -19,7 +20,7 @@ class _class_or_instancemethod(classmethod):
 class ErrorEnum(Enum):
     @_class_or_instancemethod
     @property
-    def Exception(self_or_cls) -> Type[_ExceptionWithErrorAndData["Self"]]:
+    def Exception(self_or_cls) -> type[_ExceptionWithErrorAndData["Self"]]:
         if self_or_cls is ErrorEnum:
             return _ExceptionWithErrorAndData
 
