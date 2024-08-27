@@ -1,7 +1,8 @@
+from __future__ import annotations
 import asyncio
 from contextvars import ContextVar
 from functools import wraps
-from typing import Callable, Optional, TypeVar
+from typing import Callable, TypeVar
 from uuid import uuid4
 
 from asyncpg import Connection
@@ -20,7 +21,7 @@ class MissingCurrentSession(RuntimeError):
     pass
 
 
-def get_current_session(allow_missing=False) -> Optional[AsyncSession]:
+def get_current_session(allow_missing=False) -> AsyncSession | None:
     if allow_missing:
         session = _current_session_var.get(None)
     else:
@@ -49,16 +50,16 @@ class UniqIdConnection(Connection):
 
 class SessionMaker(sessionmaker):
     def __init__(
-        self, db_url: Optional[str] = None, hide_parameters: bool = True, connect_args: dict = None, **engine_kwargs
+        self, db_url: str | None = None, hide_parameters: bool = True, connect_args: dict = None, **engine_kwargs
     ):
-        self.engine: Optional[AsyncEngine] = None
-        self.session_maker: Optional[sessionmaker] = None
+        self.engine: AsyncEngine | None = None
+        self.session_maker: sessionmaker | None = None
         self.db_url: str = db_url
         self.hide_parameters = hide_parameters
         self.connect_args = connect_args
         self.engine_kwargs = engine_kwargs
 
-    def initialize(self, db_url: Optional[str] = None, **engine_kwargs):
+    def initialize(self, db_url: str | None = None, **engine_kwargs):
         if not db_url:
             db_url = self.db_url
         kwargs = {"connect_args": self.connect_args or {}, **self.engine_kwargs, **engine_kwargs}

@@ -1,3 +1,4 @@
+from __future__ import annotations
 from collections import defaultdict
 from typing import Union, Collection, TypeVar, Type, Any, Tuple, List, Dict, Optional
 
