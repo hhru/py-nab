@@ -15,11 +15,14 @@ packages = [
 [tool.poetry.dependencies]
 python = ">=3.8,<=3.12"
 pytest = ">= 7.2.0"
-pytest-asyncio = ">= 0.20.1"
+pytest-asyncio = ">= 0.20.1,< 0.23"
 testcontainers = { version = ">= 4.4.0", python = ">=3.9,<=3.12" }
 psycopg2-binary = ">= 2.9.5"
 redis = "*"
 SQLAlchemy = {extras = ["asyncio"], version = "*"}
+
+[tool.poetry.group.test.dependencies]
+ruff = '0.1.8'
 
 [tool.poetry.plugins."pytest11"]
 almatest = "almatest"
@@ -32,7 +35,10 @@ addopts = '''
   -p no:warnings
 '''
 
-[tool.black]
+[tool.ruff]
 line-length = 120
-target-version = ['py39']
-include = '\.pyi?$'
+target-version = 'py38'
+select = [
+    'FA',
+]
+preview = true
